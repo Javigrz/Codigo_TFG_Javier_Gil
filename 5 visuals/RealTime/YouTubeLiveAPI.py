@@ -1,3 +1,7 @@
+import sys
+sys.path.append('../config') 
+from config import YOUTUBE_API_KEY
+
 import os
 from googleapiclient.discovery import build
 import pandas as pd
@@ -41,7 +45,7 @@ class LiveYouTubeComments:
             self.data_file = os.path.join(data_dir, "liveComments.csv")
 
             self.youtube = build(
-                "youtube", "v3", developerKey="XXXX")
+                "youtube", "v3", developerKey=YOUTUBE_API_KEY)
             self.load_model = keras.models.load_model(os.path.join(model_dir, "hate_model.h5"))
             with open(os.path.join(model_dir, "tokenizer.pickle"), 'rb') as handle:
                 self.load_tokenizer = pickle.load(handle)
