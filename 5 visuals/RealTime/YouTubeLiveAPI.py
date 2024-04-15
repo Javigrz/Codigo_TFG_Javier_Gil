@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../config') 
-from config import YOUTUBE_API_KEY
+from config.youtube import YOUTUBE_API_KEY
 
 import os
 from googleapiclient.discovery import build
