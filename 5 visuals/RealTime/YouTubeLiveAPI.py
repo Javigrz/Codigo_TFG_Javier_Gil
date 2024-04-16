@@ -1,8 +1,14 @@
+import os
 import sys
-sys.path.append('../config') 
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# Agregar la ruta '../../' al sys.path
+sys_path_to_add = os.path.abspath(os.path.join(current_dir, '..', '..'))
+
+sys.path.append(sys_path_to_add)
+
 from config.youtube import YOUTUBE_API_KEY
 
-import os
 from googleapiclient.discovery import build
 import pandas as pd
 from IPython.display import JSON
@@ -39,14 +45,14 @@ class LiveYouTubeComments:
     def __init__(self):
             # Obtiene la ruta absoluta del archivo actual
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            model_dir = os.path.join(current_dir, "../Model")
-            data_dir = os.path.join(current_dir, "../Data/LiveYT/liveComments.csv")
-            data_dir = os.path.join(current_dir, "../Data/LiveYT")  # Change to the directory containing the CSV file
+            model_dir = os.path.join(current_dir, "../../3 model")
+            data_dir = os.path.join(current_dir, "../../data/4 LiveYT")
+            
             self.data_file = os.path.join(data_dir, "liveComments.csv")
 
             self.youtube = build(
                 "youtube", "v3", developerKey=YOUTUBE_API_KEY)
-            self.load_model = keras.models.load_model(os.path.join(model_dir, "hate_model.h5"))
+            self.load_model = keras.models.load_model(os.path.join(model_dir, "sentiment_model.h5"))
             with open(os.path.join(model_dir, "tokenizer.pickle"), 'rb') as handle:
                 self.load_tokenizer = pickle.load(handle)
 
@@ -224,7 +230,7 @@ class LiveYouTubeComments:
         text = re.sub(r"&amp;", "&", text)
         
         # Typos, slang and informal abbreviations
-        text = re.sub(r"w/e", "whatever", text)
+        text = re.sub(r"w/e", "wsentimentver", text)
         text = re.sub(r"w/", "with", text)
         text = re.sub(r"USAgov", "USA government", text)
         text = re.sub(r"recentlu", "recently", text)
@@ -483,12 +489,12 @@ class LiveYouTubeComments:
         
         return text
 
-    def predict_hate_speech(self, text):
-        cleaned_text = self.clean_text(text)
-        seq = self.load_tokenizer.texts_to_sequences([cleaned_text])
+    def predict_sentiment(text):
+        cleaned_text = clean(text)
+        seq = load_tokenizer.texts_to_sequences([cleaned_text])
         padded = sequence.pad_sequences(seq, maxlen=300)
-        pred = self.load_model.predict(padded)
-
+        pred = load_model.predict(padded)
+        
         if pred < 0.3:
             return 0
         else:
@@ -503,7 +509,7 @@ class LiveYouTubeComments:
             existing_comments = set(df['comment'].values)
         else:
             # El archivo no existe o está vacío, crear un DataFrame vacío
-            df = pd.DataFrame(columns=['comment', 'date', 'user', 'hate'])
+            df = pd.DataFrame(columns=['comment', 'user', 'date', 'sentiment'])
             existing_comments = set()
 
         # Obtener los nuevos comentarios usando la función get_comments_in_live_videos
@@ -512,26 +518,27 @@ class LiveYouTubeComments:
 
         # Filtrar los comentarios que son realmente nuevos
         new_comments_df = new_comments_df[~new_comments_df['comment'].isin(existing_comments)]
-        new_comments = new_comments_df[['comment', 'date', 'user']]
+        new_comments = new_comments_df[['comment', 'user', 'date']]
 
-        # Clasificar los comentarios nuevos usando la función predict_hate_speech
-        new_comments['hate'] = new_comments['comment'].apply(self.predict_hate_speech)
+        print(f"\n\n\n\n\n\n{new_comments['comment'][0]}\n\n\n\n\n\n")
 
-        # Contar el número de '1' y '0' en la columna 'hate'
-        hate_counts = df['hate'].value_counts().to_dict()
-        count_1 = hate_counts.get(1, 0)
-        count_0 = hate_counts.get(0, 0)
+        # Clasificar los comentarios nuevos usando la función predict_sentiment
+        # new_comments['sentiment'] = new_comments['comment'].apply(self.predict_sentiment)
+        new_comments['sentiment'] = 1
 
-        # Imprimir los comentarios nuevos en la consola con el formato deseado, incluyendo la clasificación 'hate'
+        # Contar el número de '1' y '0' en la columna 'sentiment'
+        sentiment_counts = df['sentiment'].value_counts().to_dict()
+        count_1 = sentiment_counts.get(1, 0)
+        count_0 = sentiment_counts.get(0, 0)
+
+        # Imprimir los comentarios nuevos en la consola con el formato deseado, incluyendo la clasificación 'sentiment'
         for _, row in new_comments.iterrows():
             comment = row['comment']
-            date = row['date']
             user = row['user']
-            hate = row['hate']
-            no_hate = 0
+            date = row['date']
+            sentiment = row['sentiment']
 
-            if (hate == 0):
-                no_hate = 1
+            if (sentiment == 0):
                 count_1 += 1
             else:
                 count_0 += 1
@@ -539,13 +546,12 @@ class LiveYouTubeComments:
 
             data.append({
                 "comment": comment,
-                "date": date,
                 "user": user,
-                "hate": hate,
-                "no_hate": no_hate,
-                "number_hate": count_1,
-                "number_noHate": count_0,
-                "group": "hate",
+                "date": date,
+                "sentiment": sentiment,
+                "number_positive": count_1,
+                "number_negative": count_0,
+                "group": "sentiment",
                 "count": count_1 + count_0
             })
 
@@ -556,5 +562,5 @@ class LiveYouTubeComments:
         # Guardar los comentarios actualizados en el archivo CSV
         df_new.to_csv(self.data_file, index=False, sep=';')
 
-        # Devolver la lista de datos y los conteos de '1' y '0' en la columna 'hate'
+        # Devolver la lista de datos y los conteos de '1' y '0' en la columna 'sentiment'
         return data
