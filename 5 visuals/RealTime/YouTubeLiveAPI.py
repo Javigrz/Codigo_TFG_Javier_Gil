@@ -489,11 +489,11 @@ class LiveYouTubeComments:
         
         return text
 
-    def predict_sentiment(text):
-        cleaned_text = clean(text)
-        seq = load_tokenizer.texts_to_sequences([cleaned_text])
+    def predict_sentiment(self, text):
+        cleaned_text = self.clean_text(text)
+        seq = self.load_tokenizer.texts_to_sequences([cleaned_text])
         padded = sequence.pad_sequences(seq, maxlen=300)
-        pred = load_model.predict(padded)
+        pred = self.load_model.predict(padded)
         
         if pred < 0.3:
             return 0
@@ -520,11 +520,8 @@ class LiveYouTubeComments:
         new_comments_df = new_comments_df[~new_comments_df['comment'].isin(existing_comments)]
         new_comments = new_comments_df[['comment', 'user', 'date']]
 
-        print(f"\n\n\n\n\n\n{new_comments['comment'][0]}\n\n\n\n\n\n")
-
         # Clasificar los comentarios nuevos usando la función predict_sentiment
-        # new_comments['sentiment'] = new_comments['comment'].apply(self.predict_sentiment)
-        new_comments['sentiment'] = 1
+        new_comments['sentiment'] = new_comments['comment'].apply(self.predict_sentiment)
 
         # Contar el número de '1' y '0' en la columna 'sentiment'
         sentiment_counts = df['sentiment'].value_counts().to_dict()
