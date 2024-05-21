@@ -10,7 +10,7 @@ El proyecto desarrolla un sistema integral de análisis de sentimientos aplicabl
 - Analizar la experiencia del cliente y la percepción de la marca en el entorno digital a través del análisis de comentarios y reseñas en YouTube y Reddit.
 - Implementar paneles estáticos y dinámicos en Power BI para facilitar la visualización de resultados en tiempo real.
 
-===
+---
 
 ## Instalación y Dependencias
 
@@ -78,11 +78,11 @@ Asegúrate de tener un entorno de Python configurado correctamente y ejecutar el
 ## Uso
 - for train
   ```
-  [3 model/pythonModel.ipynb](https://github.com/Javigrz/Codigo_TFG_Javier_Gil/blob/main/3%20model/pythonModel.ipynb)
+  3 model/pythonModel.ipynb
   ```
 - for test
   ```
-  [4 prediction/generate_predictions_comments.ipynb](https://github.com/Javigrz/Codigo_TFG_Javier_Gil/blob/main/4%20prediction/generate_predictions_comments.ipynb)
+  4 prediction/generate_predictions_comments.ipynb
   ```
 ## Pretrained model
 | Model | Download |
@@ -189,4 +189,4 @@ Asegúrate de tener un entorno de Python configurado correctamente y ejecutar el
 |    |—— format_data_pbi.ipynb
 ```
 ## License
-![alt text](logoUPM.png)
+<img src="logoUPM.png" alt="alt text" width="200"/>
